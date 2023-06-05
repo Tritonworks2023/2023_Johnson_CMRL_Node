@@ -69,6 +69,67 @@ catch(e){
 });
 
 
+router.post('/create_new', async function(req, res) {
+  var ticket_detail = await ticketModel.findOne({ticket_no:req.body.ticket_no}).populate('job_detail');
+  console.log(ticket_detail);
+try{
+await tickethistoryModel.create({
+ticket_no:  req.body.ticket_no,
+ticket_status :  req.body.ticket_status,
+ticket_comments :  req.body.ticket_comments,
+ticket_photo :  req.body.ticket_photo,
+user_id :  req.body.user_id,
+date_of_create :  req.body.date_of_create,
+delete_status : false,
+part_no_req : req.body.part_no_req || "No",
+part_det : req.body.part_det || [],
+phase:ticket_detail.phase
+      }, 
+      function (err, user) {
+        console.log(user);
+      var c = {
+        status : req.body.ticket_status,
+        restored_time : ''
+      }
+      if(req.body.ticket_status == 'Completed') {
+        c.restored_time = req.body.date_of_create
+      }
+      console.log("************99999999999999999",c);
+      ticketModel.findByIdAndUpdate(ticket_detail._id, c, {new: true}, function (err, UpdatedDetails) {
+          if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+           // res.json({Status:"Success",Message:"Functiondetails Updated", Data : UpdatedDetails ,Code:200});
+
+           /////Notificaion call start////////
+        var params = {
+          "notify_title" : "Update Breakdown - "+req.body.ticket_no + " " +req.body.ticket_status,
+          "notify_descri" : ticket_detail.job_detail.job_no +  " " +req.body.ticket_status,
+          "notify_img" : "",
+          "notify_time" : "",
+          "date_and_time" : req.body.date_of_create,
+          "data_type" : {
+          "usertype":"4",
+          "type":""
+           }
+}
+
+request.post(
+  'http://cmrl.johnsonliftsltd.net:3000/api/notification/send_notifiation',
+  { json: params },
+  function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+      }
+  }
+);
+           /////Notificaion call stop////////
+            res.json({Status:"Success",Message:"Added successfully", Data : user ,Code:200}); 
+      });       
+      });
+}
+catch(e){
+    res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+}
+});
+
 
 router.post('/update', async function(req, res) {
     var ticket_detail = await ticketModel.findOne({ticket_no:req.body.ticket_no}).populate('job_detail');
@@ -232,12 +293,30 @@ router.post('/getFilterDatas', function (req, res) {
       [
         {
           $match: matchQuery
-  
       },
       { $lookup: {from: 'station_names', localField: 'station_detail', foreignField: '_id', as: 'station_detail'}},
        {$unwind: {path: "$station_detail",preserveNullAndEmptyArrays: true}},
        { $lookup: {from: 'job_nos', localField: 'job_detail', foreignField: '_id', as: 'job_detail'}},
        {$unwind: {path: "$job_detail",preserveNullAndEmptyArrays: true}},
+
+      //  { $set: { phase: { $toObjectId: "$phase" } } },
+      
+    //    {
+    //     $lookup: {
+    //         let: { "phase": "$phase" },
+    //         from: "phases",
+    //         pipeline: [
+    //             { "$match": { "$expr": { $eq: [{ $toString: "$_id" }, "$$phase"] } } },
+    //         ],
+    //         as: "Detail"
+    //     }
+    // },
+    // {
+    //     $unwind: {
+    //         path: "$Detail",
+    //         preserveNullAndEmptyArrays: true,
+    //     },
+    // },
       ],
       function (err, data) {
         // console.log(err);
@@ -287,10 +366,17 @@ router.get('/get_completed_value',async function (req, res) {
 
 
 router.post('/fetch_ticket_no',async function (req, res) {
-    var ticket_detail = await ticketModel.findOne({ticket_no:req.body.ticket_no});
+    var ticket_detail = await ticketModel.find({ticket_no:req.body.ticket_no});
     console.log("ticket_detail",ticket_detail);
     res.json({Status:"Success",Message:"Updated Complete Time", Data : ticket_detail ,Code:200});
 });
+
+router.post('/history_fetch_ticket_no',async function (req, res) {
+    var ticket_detail = await tickethistoryModel.find({ticket_no:req.body.ticket_no});
+    console.log("ticket_detail",ticket_detail);
+    res.json({Status:"Success",Message:"Updated Complete Time", Data : ticket_detail ,Code:200});
+});
+
 
 
 router.post('/getFilterDatas_alldatas', function (req, res) {
@@ -316,6 +402,31 @@ router.post('/getFilterDatas_alldatas', function (req, res) {
         //   res.json({Status:"Success",Message:"Ticket History List", Data : StateList ,Code:200});
         // }).populate("user_id");
 });
+
+
+
+
+
+
+
+
+router.get('/getlist_null', function (req, res) {
+        ticketModel.find({}, function (err, Functiondetails) {
+          for(let a = 0 ; a < Functiondetails.length ; a++){
+             if(Functiondetails[a].station_detail == null){
+            console.log("True");
+           ticketModel.findByIdAndRemove(Functiondetails[a]._id, function (err, user) {
+           if (err) return res.json({Status:"Failed",Message:"Internal Server Error", Data : {},Code:500});
+            // res.json({Status:"Success",Message:"SubFunction Deleted successfully", Data : {} ,Code:200});
+         });
+            }
+            if(a == Functiondetails.length - 1){
+                res.json({Status:"Success",Message:"Job No List Details", Data : Functiondetails ,Code:200});
+            }
+          }
+        }).populate("station_detail job_detail");
+});
+
 
 
 

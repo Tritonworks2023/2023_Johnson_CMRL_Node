@@ -15,7 +15,8 @@ router.post('/create', async function(req, res) {
             unique_id : req.body.unique_id,
             serving_level : req.body.serving_level,
             created_date :req.body.created_date,
-            delete_status : false
+            delete_status : false,
+            phase:req.body.phase,
         }, 
         function (err, user) {
           console.log(user)
@@ -38,7 +39,12 @@ router.get('/deletes', function (req, res) {
 
 
 router.get('/get_jobno/lift', function (req, res) {
-        job_noModel.find({delete_status : false}, function (err, Functiondetails) {
+ 
+  var matchQuery={
+    delete_status : false
+  };
+  
+     job_noModel.find(matchQuery, function (err, Functiondetails) {
          var final_output = [];
 
          for(let a  = 0 ; a < Functiondetails.length ;a ++){
@@ -50,15 +56,51 @@ router.get('/get_jobno/lift', function (req, res) {
             final_output.push(c);
           }        
           if(a == Functiondetails.length - 1){
-            res.json({Status:"Success",Message:"Job No List Details", Data : final_output ,Code:200});
+            res.json({Status:"Success",Message:"Job No1 List Details", Data : final_output ,Code:200});
           }
          }   
         }).populate("station_id");
 });
 
 
+router.get('/get_jobno/newlift', function (req, res) {
+  var phaseID = req.query.id ? req.query.id:null;
+  var matchQuery={
+    delete_status : false
+  };
+  if(phaseID){
+    matchQuery.phase = phaseID;
+  }
+     job_noModel.find(matchQuery, function (err, Functiondetails) {
+         var final_output = [];
+        if(Functiondetails && Functiondetails.length > 0){
+          for(let a  = 0 ; a < Functiondetails.length ;a ++){
+            if(Functiondetails[a].station_id.type == "1"){
+              let c = {
+                _id :  Functiondetails[a]._id,
+                job_no : Functiondetails[a].job_no
+              }
+              final_output.push(c);
+            }        
+            if(a == Functiondetails.length - 1){
+              res.json({Status:"Success",Message:"Job No List Details", Data : final_output ,Code:200});
+            }
+           } 
+        }else{
+          res.json({Status:"Success",Message:"Empty Records", Data : final_output ,Code:200});
+        }
+          
+        }).populate("station_id");
+});
+
+
 router.get('/get_jobno/elivator', function (req, res) {
-        job_noModel.find({delete_status : false}, function (err, Functiondetails) {
+  
+  var matchQuery={
+    delete_status : false
+  };
+ 
+        job_noModel.find(matchQuery, function (err, Functiondetails) {
          var final_output = [];
 
          for(let a  = 0 ; a < Functiondetails.length ;a ++){
@@ -73,6 +115,39 @@ router.get('/get_jobno/elivator', function (req, res) {
             res.json({Status:"Success",Message:"Job No List Details", Data : final_output ,Code:200});
           }
          }   
+        }).populate("station_id");
+});
+
+
+router.get('/get_jobno/newelivator', function (req, res) {
+  var phaseID = req.query.id ? req.query.id:null;
+  var matchQuery={
+    delete_status : false
+  };
+  if(phaseID){
+    matchQuery.phase = phaseID;
+  }
+  console.log("matchQuery",matchQuery);
+        job_noModel.find(matchQuery, function (err, Functiondetails) {
+         var final_output = [];
+        
+         if(Functiondetails && Functiondetails.length > 0){
+          for(let a  = 0 ; a < Functiondetails.length ;a ++){
+            if(Functiondetails[a].station_id.type == "2"){
+              let c = {
+                _id :  Functiondetails[a]._id,
+                job_no : Functiondetails[a].job_no
+              }
+              final_output.push(c);
+            }        
+            if(a == Functiondetails.length - 1){
+              res.json({Status:"Success",Message:"Job No List Details", Data : final_output ,Code:200});
+            }
+           }  
+         }else{
+          res.json({Status:"Success",Message:"Empty Records", Data : final_output ,Code:200});
+         }
+        
         }).populate("station_id");
 });
 

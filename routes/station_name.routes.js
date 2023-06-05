@@ -4,8 +4,8 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 var station_nameModel = require('./../models/station_nameModel');
-
-
+var phaseModel = require('./../models/phase.model');
+var ObjectId = require('mongodb').ObjectID;
 router.post('/create', async function(req, res) {
   
   var Station_details = await station_nameModel.findOne({station_name:req.body.station_name,type:req.body.type});
@@ -13,6 +13,7 @@ router.post('/create', async function(req, res) {
   try{
         await station_nameModel.create({
             station_name:  req.body.station_name,
+            phase:req.body.phase,
             type : req.body.type,
             delete_status : false
         }, 
@@ -56,10 +57,63 @@ router.delete('/delete/:id', function (req, res) {
       });
 });
 
-router.get('/getlist', function (req, res) {
-        station_nameModel.find({}, function (err, Functiondetails) {
-          res.json({Status:"Success",Message:"Station Details List", Data : Functiondetails ,Code:200});
-        });
+router.get('/getlist', async function (req, res) {
+
+
+// var phase = req.body.phase ? req.body.phase :"6421243d20498044b0c7bb42";
+  var Functiondetails =await station_nameModel.aggregate(
+    [
+      // {
+      //   "$match": {
+      //     phase:phase
+      //   }
+      // },
+      // { $set: { phase: { $toObjectId: "$phase" } } },
+    //   {
+    //     $lookup: {
+    //       from: 'phases',
+    //       localField: 'phase',
+    //       foreignField: '_id',
+    //       as: 'Detail'
+    //     }
+    //   },
+    // {
+    //     $unwind: {
+    //         path: "$Detail",
+    //         preserveNullAndEmptyArrays: true,
+    //     },
+    // },
+
+    {
+      $group: {
+          _id: "$_id",
+          // phase_name:{ $first: "$Detail.phase" },
+          station_name:{ $first: "$station_name" },
+          type:{ $first: "$type" },
+          delete_status:{ $first: "$delete_status" },
+          updatedAt:{ $first: "$updatedAt" },
+          createdAt:{ $first: "$createdAt" },
+          phase:{ $first: "$phase" },
+      }
+    },
+
+    { "$sort": { "_id": -1 } },
+   
+    ],
+  )
+
+  res.json({Status:"Success",Message:"Station Details List", Data : Functiondetails ,Code:200});
+        // station_nameModel.find({}, async function (err, Functiondetails) {
+
+        //  await Functiondetails.forEach(async element => {
+        //     if(element.phase){
+        //     var temp= await phaseModel.findOne({_id:ObjectId(element.phase)});
+        //     // console.log(temp);
+        //     element.phaseName=temp.phase;
+        //     }
+        //   });
+        //   res.json({Status:"Success",Message:"Station Details List", Data : Functiondetails ,Code:200});
+        // });
 });
 
 

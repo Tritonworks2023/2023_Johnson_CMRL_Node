@@ -476,6 +476,38 @@ router.post('/logout',async function (req, res) {
 
 
 
+router.get('/logout_reason', function (req, res) {
+         var StateList = [
+             {
+                logout_reason:"LEAVE - FN"
+             },
+             {
+                logout_reason:"LEAVE - AN"
+             },
+             {
+                logout_reason:"LEAVE - FULL DAY"
+             },
+             {
+                logout_reason:"DAY OUT"
+             },
+             {
+                logout_reason:"PERMISSION"
+             },
+             {
+                logout_reason:"OFFICE / TRAINING"
+             },
+             {
+                logout_reason:"STANDBY"
+             },
+             {
+                logout_reason:"RW SUPPORT"
+             }
+         ];
+        res.json({Status:"Success",Message:"LOGOUT REASON", Data : StateList ,Code:200});
+});
+
+
+
 
 // // DELETES A USER FROM THE DATABASE
 router.post('/admin_delete', function (req, res) {

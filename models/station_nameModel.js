@@ -6,6 +6,7 @@ var station_nameSchema = new mongoose.Schema({
   station_name:  String,
   type : String, 
   delete_status : Boolean,
+  phase:String
 });
 station_nameSchema.plugin(timestamps);
 mongoose.model('station_name', station_nameSchema);

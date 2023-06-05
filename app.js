@@ -29,6 +29,7 @@ var attendance = require('./routes/attendance.routes');
 var dashboard_details= require("./routes/dashboard_details");
 var part_no= require("./routes/part_no.routes");
 var preventive_data= require("./routes/preventive_data.routes");
+var phaseDetails = require("./routes/phase.routes");
 
 
 
@@ -169,7 +170,7 @@ app.use('/api/attendance', attendance);
 app.use('/api/dashboard_details', dashboard_details);
 app.use('/api/part_no', part_no);
 app.use('/api/preventive_data', preventive_data);
-
+app.use('/api/phase', phaseDetails);
 
 
 

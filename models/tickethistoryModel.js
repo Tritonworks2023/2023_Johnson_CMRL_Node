@@ -16,7 +16,7 @@ var tickethistorySchema = new mongoose.Schema({
 
   part_no_req : String,
   part_det : Array,
-
+ phase:String
 
 });
 tickethistorySchema.plugin(timestamps);

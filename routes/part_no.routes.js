@@ -15,7 +15,8 @@ router.post('/create', async function(req, res) {
             part_type:  req.body.part_type,
             part_no:  req.body.part_no,
             part_name:  req.body.part_name,
-            delete_status : false
+            delete_status : false,
+            phase:req.body.phase
         }, 
         function (err, user) {
           console.log(user)

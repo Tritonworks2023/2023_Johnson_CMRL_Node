@@ -12,6 +12,7 @@ var job_noSchema = new mongoose.Schema({
   unique_id : String,
   serving_level : String,
   delete_status : Boolean,
+  phase:String
 });
 job_noSchema.plugin(timestamps);
 mongoose.model('job_no', job_noSchema);

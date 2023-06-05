@@ -7,6 +7,11 @@ var attendanceModel = require('./../models/attendanceModel');
 
 
 router.post('/create', async function(req, res) {
+    console.log(req.body);
+    console.log(req.body.check_in_long);
+    console.log(req.body.check_in_lat);
+    console.log(req.body.check_out);
+    console.log(req.body.check_in_lat);
   var attendance_detail = await attendanceModel.findOne({user_id:req.body.user_id,date:req.body.date});
   console.log(attendance_detail);
   if(attendance_detail == null){
@@ -16,9 +21,17 @@ router.post('/create', async function(req, res) {
             date : req.body.date,
             check_in_time : req.body.check_in_time,
             check_in_datetime : req.body.check_in_datetime,
+            check_in_lat : req.body.check_in_lat,
+            check_in_long : req.body.check_in_long,
+            check_in_addre : req.body.check_in_addre,
+            check_out_lat : "",
+            check_out_long : "",
+            check_out_addre : "",
             check_out_time : "",
             check_out_datetime : "",
-            delete_status : false
+            remark : "",
+            delete_status : false,
+            sys_date : new Date()
         }, 
         function (err, user) {
           console.log(user)
@@ -83,7 +96,7 @@ router.delete('/delete/:id', function (req, res) {
 router.get('/getlist', function (req, res) {
         attendanceModel.find({}, function (err, Functiondetails) {
           res.json({Status:"Success",Message:"Station Details List", Data : Functiondetails ,Code:200});
-        });
+        }).limit(1000).sort({ _id: -1 });
 });
 
 

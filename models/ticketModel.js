@@ -31,7 +31,8 @@ var ticketSchema = new mongoose.Schema({
   status : String,
   type : String,
   create_date_time :  Date,
-  image_list : Array
+  image_list : Array,
+  phase:String
 });
 ticketSchema.plugin(timestamps);
 mongoose.model('ticket', ticketSchema);

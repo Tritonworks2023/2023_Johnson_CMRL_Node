@@ -7,6 +7,7 @@ var part_noSchema = new mongoose.Schema({
   part_no : String, 
   part_name : String, 
   delete_status : Boolean,
+  phase:String
 });
 part_noSchema.plugin(timestamps);
 mongoose.model('part_no', part_noSchema);
